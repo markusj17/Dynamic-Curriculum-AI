@@ -18,5 +18,5 @@ COPY . .
 EXPOSE 3001
 
 # Define the command to run the app
-CMD [ "npm", "run", "dev" ]
+CMD [ "npm", "start" ]
 # For production, you might use: CMD [ "npm", "start" ]
