@@ -1,16 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const {
-    createCheckoutSession,
-    stripeWebhook,
-    createPortalSession,
-    getSubscriptionStatus
-} = require('../controllers/stripeController');
+const stripeController = require('../controllers/stripeController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.post('/create-checkout-session', protect, createCheckoutSession);
-router.post('/webhook', stripeWebhook); 
-router.post('/create-portal-session', protect, createPortalSession);
-router.get('/subscription-status', protect, getSubscriptionStatus);
+
+
+router.post('/create-checkout-session', protect, stripeController.createCheckoutSession);
+router.post('/create-portal-session', protect, stripeController.createPortalSession);
+router.get('/subscription-status', protect, stripeController.getSubscriptionStatus);
 
 module.exports = router;
