@@ -31,7 +31,7 @@
         </p>
         <div class="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
           <router-link to="/signup" class="btn-intellipath-primary !px-8 !py-3 text-lg w-full sm:w-auto">
-            Get Started Free
+            Get Started
           </router-link>
           <a href="#features" v-smooth-scroll class="btn-intellipath-secondary !px-8 !py-3 text-lg w-full sm:w-auto">
             Learn More
