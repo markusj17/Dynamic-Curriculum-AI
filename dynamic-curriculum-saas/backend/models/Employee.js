@@ -22,7 +22,7 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: { // Optional for direct employee login later
+    email: { 
       type: DataTypes.STRING,
       unique: true,
       allowNull: true,
