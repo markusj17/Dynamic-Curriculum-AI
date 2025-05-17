@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile # You'll need to create this Dockerfile for backend
+    container_name: dcs-backend
+    ports:
+      - "3001:3001" # Assuming backend runs on 3001
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules # Avoids overwriting node_modules in container
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mysql://user:password@db:3306/dcs_db # Example
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - db
+    command: npm run dev # Or your start script
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # You'll need to create this Dockerfile for frontend
+    container_name: dcs-frontend
+    ports:
+      - "5173:5173" # Vite default dev port
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:3001/api # For frontend to call backend
+    command: npm run dev
+
+  db:
+    image: mysql:8.0
+    container_name: dcs-mysql
+    ports:
+      - "3307:3306" # Host port 3307 maps to container port 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: dcs_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

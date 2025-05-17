@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #app {
+    @apply min-h-screen h-full;
+  }
+
+  body {
+    @apply bg-slate-900 text-slate-200 antialiased;
+    font-family: 'Inter', sans-serif;
+    
+    background-repeat: no-repeat;
+    background-attachment: fixed; 
+  }
+}
+
+@layer components {
+  .input-field-intellipath {
+    @apply block w-full appearance-none rounded-lg border-2 border-slate-700 bg-slate-800/50 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-sm backdrop-blur-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm transition-colors duration-300;
+  }
+
+  .btn-intellipath-primary {
+    @apply relative inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-teal-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/30 transition-all duration-200 ease-out hover:shadow-xl hover:shadow-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 overflow-hidden;
+  }
+
+  .btn-intellipath-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-slate-700 bg-slate-800/50 px-6 py-3 text-base font-semibold text-slate-200 backdrop-blur-sm shadow-md transition-all duration-200 ease-out hover:border-sky-500 hover:text-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+
+  .card-intellipath {
+    @apply bg-slate-800/70 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-2xl;
+  }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-subtle-pulse {
+  animation: subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
