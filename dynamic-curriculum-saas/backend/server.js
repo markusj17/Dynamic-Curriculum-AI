@@ -24,9 +24,12 @@ if (process.env.CLIENT_URL && !allowedOrigins.includes(process.env.CLIENT_URL)) 
 
 const corsOptions = {
   origin: function (origin, callback) {
+
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      console.log(`[CORS] Allowing origin: ${origin || 'No Origin (Allowed)'}`);
       callback(null, true);
     } else {
+      console.error(`[CORS] Blocking origin: ${origin}. Not in allowed list: ${allowedOrigins.join(', ')}`);
       callback(new Error(`CORS policy does not allow access from origin ${origin}`));
     }
   },
@@ -35,7 +38,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Stripe webhook needs raw body, so it must come before express.json() for that route
 app.use('/api/stripe/webhook', express.raw({type: 'application/json'}));
 
 app.use(express.json()); 
