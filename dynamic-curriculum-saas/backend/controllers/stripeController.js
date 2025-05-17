@@ -1,7 +1,7 @@
 const stripeService = require('../services/stripeService');
 const { User } = require('../models');
 
-exports.stripeWebhook = async (req, res, next)
+exports.stripeWebhook = async (req, res, next) => { // 
     try {
         const sig = req.headers['stripe-signature'];
         const payload = req.body; 
@@ -11,8 +11,8 @@ exports.stripeWebhook = async (req, res, next)
             return res.status(400).send('Webhook Error: Missing Stripe signature.');
         }
         if (!payload || payload.length === 0) {
-            console.warn("[WEBHOOK_CONTROLLER] Stripe Webhook: Missing payload.");
-            return res.status(400).send('Webhook Error: Missing payload.');
+            console.warn("[WEBHOOK_CONTROLLER] Stripe Webhook: Missing or empty payload.");
+            return res.status(400).send('Webhook Error: Missing or empty payload.');
         }
         
         console.log("[WEBHOOK_CONTROLLER] Stripe Webhook: Received, attempting to handle.");
@@ -20,12 +20,12 @@ exports.stripeWebhook = async (req, res, next)
         res.status(200).json({ received: true });
     } catch (error) {
         console.error('[WEBHOOK_CONTROLLER] Stripe Webhook Error:', error.message, error.stack ? `\nStack: ${error.stack}` : '');
-
         const statusCode = error.statusCode || 400; 
         res.status(statusCode).send(`Webhook Error: ${error.message}`);
-    };
+    }
+};
 
-exports.createCheckoutSession = async (req, res, next) => { 
+exports.createCheckoutSession = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { priceId } = req.body;
@@ -34,7 +34,7 @@ exports.createCheckoutSession = async (req, res, next) => {
     if (!user) {
         const err = new Error("User not found.");
         err.statusCode = 404;
-        throw err;
+        throw err; 
     }
     if (!priceId) {
         const err = new Error("Price ID is required.");
@@ -50,28 +50,26 @@ exports.createCheckoutSession = async (req, res, next) => {
     const session = await stripeService.createCheckoutSession(userId, priceId, user.company_id, user.email);
     res.json({ sessionId: session.id, url: session.url });
   } catch (error) {
-    console.error("Controller Error in createCheckoutSession:", error.message, error.stack ? `\nStack: ${error.stack}` : '');
     next(error); 
   }
 };
 
-exports.createPortalSession = async (req, res, next) => { 
+exports.createPortalSession = async (req, res, next) => {
     try {
         const user = await User.findByPk(req.user.id);
         if (!user || !user.stripe_customer_id) {
             const err = new Error("User not found or no Stripe customer ID.");
-            err.statusCode = 400; // Or 404
+            err.statusCode = 400;
             throw err;
         }
         const portalSession = await stripeService.createPortalSession(user.stripe_customer_id);
         res.json({ url: portalSession.url });
     } catch (error) {
-        console.error("Controller Error in createPortalSession:", error.message, error.stack ? `\nStack: ${error.stack}` : '');
         next(error);
     }
 };
 
-exports.getSubscriptionStatus = async (req, res, next) => { 
+exports.getSubscriptionStatus = async (req, res, next) => {
     try {
         const user = await User.findByPk(req.user.id, { attributes: ['id','subscription_status', 'stripe_customer_id'] });
         if (!user) {
@@ -85,7 +83,6 @@ exports.getSubscriptionStatus = async (req, res, next) => {
             hasStripeCustomer: !!user.stripe_customer_id
         });
     } catch (error) {
-        console.error("Controller Error in getSubscriptionStatus:", error.message, error.stack ? `\nStack: ${error.stack}` : '');
         next(error);
     }
 };
