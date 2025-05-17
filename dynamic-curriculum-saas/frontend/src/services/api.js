@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '../stores/authStore'; // Import Pinia store
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://dynamic-curriculum-ai-production.up.railway.app/api',
   headers: {
     'Content-Type': 'application/json',
   },

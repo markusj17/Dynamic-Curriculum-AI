@@ -41,7 +41,7 @@ exports.createCheckoutSession = async (req, res) => {
     res.status(500).json({ message: 'Error creating Stripe checkout session.', error: error.message });
   }
 };
-exports.createPortalSession = async (req, res) => { /* ... as before ... */ 
+exports.createPortalSession = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id);
         if (!user || !user.stripe_customer_id) {
@@ -54,7 +54,7 @@ exports.createPortalSession = async (req, res) => { /* ... as before ... */
         res.status(500).json({ message: 'Error creating Stripe portal session', error: error.message });
     }
 };
-exports.getSubscriptionStatus = async (req, res) => { /* ... as before ... */ 
+exports.getSubscriptionStatus = async (req, res) => { 
     try {
         const user = await User.findByPk(req.user.id, { attributes: ['id','subscription_status', 'stripe_customer_id'] });
         if (!user) return res.status(404).json({ message: "User not found." });
