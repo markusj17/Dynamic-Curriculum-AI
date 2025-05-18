@@ -15,7 +15,7 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
     }
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" }); 
+        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" }); 
 
         const prompt = `
             You are an expert Learning and Development curriculum designer.
