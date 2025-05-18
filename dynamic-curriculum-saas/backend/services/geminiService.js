@@ -21,7 +21,6 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         console.error("[Gemini Service] FATAL: GEMINI_API_KEY is not set.");
         throw new Error("Gemini API key not configured on server.");
     }
-
     const modelName = "gemini-1.0-pro"; 
     let textResponseFromAI;
 
