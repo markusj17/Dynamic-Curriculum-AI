@@ -9,8 +9,8 @@ const userRoutes = require('./routes/userRoutes');
 const companyRoutes = require('./routes/companyRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const learningPathRoutes = require('./routes/learningPathRoutes');
-const stripeController = require('./controllers/stripeController'); // Import controller directly for webhook
-const otherStripeRoutes = require('./routes/stripeRoutes'); // For other /api/stripe/* routes
+const stripeController = require('./controllers/stripeController');
+const otherStripeRoutes = require('./routes/stripeRoutes');
 
 const app = express();
 
