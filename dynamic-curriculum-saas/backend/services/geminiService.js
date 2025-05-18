@@ -95,7 +95,6 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         return learningPath.map(step => ({ ...step, completed: false }));
 
     } catch (apiOrParseError) {
-        console.log(listModels());
         console.error("[Gemini Service] Error during Gemini interaction or parsing:", 
                       apiOrParseError.message, 
                       apiOrParseError.stack ? `\nStack (short): ${apiOrParseError.stack.substring(0, 500)}`: '', 
