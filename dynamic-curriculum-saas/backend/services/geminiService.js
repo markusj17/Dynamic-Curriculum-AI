@@ -22,7 +22,7 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         throw new Error("Gemini API key not configured on server.");
     }
 
-    const modelName = "gemini-1.0-pro"; 
+    const modelName = "gemini-1.5-flash"; 
     let textResponseFromAI;
 
     try {
