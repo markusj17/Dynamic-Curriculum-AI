@@ -14,6 +14,7 @@ const otherStripeRoutes = require('./routes/stripeRoutes');
 const app = express();
 
 const allowedOrigins = [
+  'http://localhost:5173',
   'http://localhost:5174',
   'https://teal-faloodeh-121965.netlify.app/',
 ];
