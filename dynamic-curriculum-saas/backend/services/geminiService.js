@@ -1,11 +1,9 @@
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
-// Check if API key is available
 if (!process.env.GEMINI_API_KEY) {
     console.error("[Gemini Service] FATAL: GEMINI_API_KEY is not set or empty.");
 }
 
-// Initialize the Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const generationConfig = {
@@ -28,16 +26,14 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         throw new Error("Gemini API key not configured on server.");
     }
     
-    // Important: Do NOT include "models/" prefix
-    // Check the package version - this might be important
+
     console.log("[Gemini Service] @google/generative-ai version:", require('@google/generative-ai/package.json').version);
     
     try {
-        // Try with "gemini-pro"
         console.log("[Gemini Service] Creating model with name: gemini-pro");
         
         const model = genAI.getGenerativeModel({
-            model: "gemini-pro",  // No "models/" prefix
+            model: "gemini-1.5-flash-latest", 
             generationConfig,
             safetySettings,
         });
