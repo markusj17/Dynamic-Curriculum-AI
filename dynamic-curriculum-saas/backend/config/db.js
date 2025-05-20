@@ -16,7 +16,7 @@ if (process.env.DATABASE_URL) {
     process.env.DB_USER || 'user',
     process.env.DB_PASSWORD || 'password',
     {
-      host: process.env.DB_HOST || 'localhost', // For local non-Docker dev
+      host: process.env.DB_HOST || 'localhost',
       dialect: process.env.DB_DIALECT || 'mysql',
       logging: process.env.NODE_ENV === 'development' ? console.log : false,
     }
