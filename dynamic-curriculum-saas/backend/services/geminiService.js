@@ -4,8 +4,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const generationConfig = {
   temperature: 0.7,
-  topK: 1,
-  topP: 1,
+  topK: 40,  // Changed from 1 to a more common value
+  topP: 0.95, // Changed from 1 to a more common value
   maxOutputTokens: 2048,
 };
 
@@ -21,16 +21,20 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         console.error("[Gemini Service] FATAL: GEMINI_API_KEY is not set.");
         throw new Error("Gemini API key not configured on server.");
     }
-    const modelName = "gemini-1.5-pro"; 
+    
+    // Try a different model that's more widely available
+    const modelName = "gemini-pro"; 
     let textResponseFromAI;
 
     try {
+        console.log("[Gemini Service] Initializing with model:", modelName);
         const model = genAI.getGenerativeModel({ 
             model: modelName,
             generationConfig,
             safetySettings
         });
         
+        // Keep your existing prompt
         const prompt = `
             You are an expert Learning and Development curriculum designer.
             An employee has the following current skills: "${currentSkills}".
@@ -54,11 +58,24 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         `;
 
         console.log(`[Gemini Service] Sending prompt to Gemini model: ${modelName}`);
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        textResponseFromAI = response.text(); // Store for potential error logging
-        console.log("[Gemini Service] Received raw text from Gemini."); // Avoid logging full text in prod for brevity/cost
+        
+        // Add more detailed logging
+        try {
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            textResponseFromAI = response.text();
+            console.log("[Gemini Service] Received raw text from Gemini.");
+        } catch (genError) {
+            console.error("[Gemini Service] Specific error during generateContent:", {
+                message: genError.message,
+                name: genError.name,
+                code: genError.code,
+                details: genError.details || "No additional details",
+            });
+            throw genError;
+        }
 
+        // Rest of your code remains the same...
         let jsonString = textResponseFromAI;
         const markdownMatch = textResponseFromAI.match(/```json\s*([\s\S]*?)\s*```/);
         if (markdownMatch && markdownMatch[1]) {
@@ -82,28 +99,32 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         }
         jsonString = jsonString.trim();
         
-        
+        try {
+            const learningPath = JSON.parse(jsonString);
 
-        const learningPath = JSON.parse(jsonString);
-
-        if (!Array.isArray(learningPath) || learningPath.length === 0 ||
-            learningPath.some(step => typeof step.topic !== 'string' || 
-                                      typeof step.description !== 'string' || 
-                                      typeof step.suggested_link !== 'string')) {
-            console.error("[Gemini Service] Invalid JSON structure or empty array received from Gemini.", learningPath);
-            throw new Error("AI returned an invalid or empty learning path structure.");
+            if (!Array.isArray(learningPath) || learningPath.length === 0 ||
+                learningPath.some(step => typeof step.topic !== 'string' || 
+                                        typeof step.description !== 'string' || 
+                                        typeof step.suggested_link !== 'string')) {
+                console.error("[Gemini Service] Invalid JSON structure or empty array received from Gemini.", learningPath);
+                throw new Error("AI returned an invalid or empty learning path structure.");
+            }
+            
+            return learningPath.map(step => ({ ...step, completed: false }));
+        } catch (parseError) {
+            console.error("[Gemini Service] JSON parsing error:", parseError.message);
+            console.error("[Gemini Service] Raw JSON string attempted to parse:", jsonString);
+            throw new Error("Failed to parse AI response as JSON. The AI returned an invalid format.");
         }
-        
-        return learningPath.map(step => ({ ...step, completed: false }));
 
     } catch (apiOrParseError) {
         console.error("[Gemini Service] Error during Gemini interaction or parsing:", 
-                      apiOrParseError.message, 
-                      apiOrParseError.stack ? `\nStack (short): ${apiOrParseError.stack.substring(0, 500)}`: '', 
-                      apiOrParseError.cause ? `\nCause: ${apiOrParseError.cause}`: '',
-                      "\nOriginal raw text from Gemini (if available):\n", 
-                      textResponseFromAI ? textResponseFromAI.substring(0,1000) + (textResponseFromAI.length > 1000 ? "..." : "") : "N/A"
-                     );
+                    apiOrParseError.message, 
+                    apiOrParseError.stack ? `\nStack (short): ${apiOrParseError.stack.substring(0, 500)}`: '', 
+                    apiOrParseError.cause ? `\nCause: ${apiOrParseError.cause}`: '',
+                    "\nOriginal raw text from Gemini (if available):\n", 
+                    textResponseFromAI ? textResponseFromAI.substring(0,1000) + (textResponseFromAI.length > 1000 ? "..." : "") : "N/A"
+                    );
         
         const serviceError = new Error(`Failed to generate learning path from AI. ${apiOrParseError.name === 'GoogleGenerativeAIError' ? 'AI service error.' : 'Data processing error.'}`);
         serviceError.statusCode = 500; 
