@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import authService from '../services/authService';
 import stripeService from '../services/stripeService';
-import router from '../router'; 
+import router from '../router'; // Ensure router is imported
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -14,108 +14,117 @@ export const useAuthStore = defineStore('auth', {
   }),
   getters: {
     isAuthenticated: (state) => !!state.token && !!state.user,
-    isLdManager: (state) => state.user && state.user.role === 'ld_manager',
-    hasActiveSubscription: (state) => state.subscriptionStatus === 'active' || state.subscriptionStatus === 'trialing',
+    isLdManager: (state) => state.user?.role === 'ld_manager',
+    hasActiveSubscription: (state) =>
+      state.subscriptionStatus === 'active' || state.subscriptionStatus === 'trialing',
     currentUser: (state) => state.user,
   },
   actions: {
-    async login(credentials) {
-      this.isLoading = true;
-      this.error = null;
-      try {
-        const response = await authService.login(credentials);
-        const { token, ...userData } = response.data;
-        this.token = token;
-        this.user = userData;
-        this.subscriptionStatus = userData.subscription_status || 'inactive';
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
-        return true;
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Login failed';
-        return false;
-      } finally {
-        this.isLoading = false;
-      }
+    _setAuthData(token, userData) {
+      this.token = token;
+      this.user = userData;
+      this.subscriptionStatus = userData.subscription_status || 'inactive';
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
     },
-    async register(userData) {
-      this.isLoading = true;
-      this.error = null;
-      try {
-        const response = await authService.register(userData);
-        const { token, ...newUserData } = response.data;
-        this.token = token;
-        this.user = newUserData;
-        this.subscriptionStatus = newUserData.subscription_status || 'inactive';
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(newUserData));
-        localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
-        return true;
-      } catch (err) {
-        this.error = err.response?.data?.message || 'Registration failed';
-        return false;
-      } finally {
-        this.isLoading = false;
-      }
-    },
-    logout() {
-      console.log("AuthStore: Logging out user.");
+    _clearAuthData() {
       this.user = null;
       this.token = null;
       this.subscriptionStatus = 'inactive';
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('subscriptionStatus');
-      if (router.currentRoute.value.meta.requiresAuth) {
+    },
+
+    async login(credentials) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const response = await authService.login(credentials);
+        const { token, ...userData } = response.data;
+        this._setAuthData(token, userData);
+        
+        const redirectPath = router.currentRoute.value.query.redirect || { name: 'LDDashboard' };
+        router.push(redirectPath);
+        return true;
+      } catch (err) {
+        this._clearAuthData();
+        this.error = err.response?.data?.message || 'Login failed. Please check your credentials.';
+        console.error("AuthStore: Login error", err.response || err);
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async register(userData) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const response = await authService.register(userData);
+        const { token, ...newUserData } = response.data;
+        this._setAuthData(token, newUserData);
+
+        console.log("AuthStore: Registration successful, user set:", this.user);
+        
+        // *** CHANGE THIS LINE ***
+        // Redirect to the dashboard after successful registration.
+        // The dashboard's route guard will then check for subscription status.
+        router.push({ name: 'LDDashboard' }); 
+
+        return true;
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Registration failed. Please try again.';
+        console.error("AuthStore: Registration error", err.response || err);
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    logout() {
+      console.log("AuthStore: Logging out user.");
+      this._clearAuthData();
+      if (router.currentRoute.value.name !== 'Login' && router.currentRoute.value.name !== 'Landing') {
          router.push({ name: 'Login' });
       }
     },
+
     async fetchCurrentUser() {
+      // ... (fetchCurrentUser logic remains the same from previous full script)
       if (!this.token || this.isFetchingCurrentUser) {
-        if (!this.token && this.user) this.logout(); 
+        if (!this.token && this.user) {
+            this._clearAuthData();
+        }
         return;
       }
-      
       this.isFetchingCurrentUser = true;
-      this.isLoading = true; 
       try {
-        console.log("AuthStore: Fetching current user...");
         const response = await authService.getMe();
-        this.user = response.data;
+        this.user = response.data; 
         this.subscriptionStatus = this.user.subscription_status || 'inactive';
         localStorage.setItem('user', JSON.stringify(this.user));
         localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
-        console.log("AuthStore: Current user fetched and updated.", this.user);
       } catch (err) {
-        console.error("AuthStore: Error fetching current user:", err.response?.data?.message || err.message);
-        if (err.response?.status === 401) {
-          this.logout();
-        }
+        if (err.response?.status === 401) this.logout();
       } finally {
-        this.isLoading = false;
         this.isFetchingCurrentUser = false;
       }
     },
+
     async checkAuthStatus() {
-      console.log("AuthStore: Checking auth status...");
-      if (this.token && !this.user) {
-        console.log("AuthStore: Token found, user object missing. Fetching current user.");
+      // ... (checkAuthStatus logic remains the same from previous full script)
+      if (this.token && !this.user) { 
         await this.fetchCurrentUser();
-      } else if (!this.token) {
-        console.log("AuthStore: No token found. Ensuring user is logged out.");
-
-        if (this.user) { 
-            this.logout();
-        }
-      } else {
-        console.log("AuthStore: Token and user object already in store. Status assumed current for now.");
-
+      } else if (!this.token && this.user) {
+        this.logout();
       }
     },
+
     async updateSubscriptionStatus() {
+      // ... (updateSubscriptionStatus logic remains the same from previous full script)
        if (!this.isAuthenticated) return;
-        this.isLoading = true;
         try {
             const response = await stripeService.getSubscriptionStatus();
             this.subscriptionStatus = response.data.status;
@@ -125,13 +134,13 @@ export const useAuthStore = defineStore('auth', {
                 localStorage.setItem('user', JSON.stringify(this.user));
             }
         } catch (error) {
-            console.error("AuthStore: Failed to update subscription status:", error.response?.data?.message || error.message);
-        } finally {
-            this.isLoading = false;
+            console.error("AuthStore: Failed to update subscription status from backend:", error.response?.data?.message || error.message);
         }
     },
+
     setSubscriptionSuccess() {
-        this.subscriptionStatus = 'active';
+      // ... (setSubscriptionSuccess logic remains the same from previous full script)
+        this.subscriptionStatus = 'active'; 
         localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
         if (this.user) {
             this.user.subscription_status = this.subscriptionStatus;

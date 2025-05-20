@@ -136,16 +136,11 @@ const handleSignup = async () => {
   });
 
   if (success) {
-    // The authStore.register action now handles redirecting to /subscription
-    // If you want to redirect to a different page first (e.g., email verification pending), do it here.
-    // For now, assuming it redirects to /subscription or /dashboard via authStore logic.
     console.log("Signup successful, authStore will handle navigation.");
   }
-  // Error messages are set by the authStore.error state
 };
 </script>
 
 <style scoped>
-/* btn-intellipath-primary and card-intellipath should come from global index.css */
-/* input-field-intellipath should come from global index.css */
+
 </style>
