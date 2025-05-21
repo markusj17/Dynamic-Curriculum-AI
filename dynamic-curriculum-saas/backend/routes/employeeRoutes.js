@@ -5,9 +5,10 @@ const {
   getEmployees,
   getEmployeeById,
   updateEmployee,
-  deleteEmployee
+  deleteEmployee,
+  regenerateEmployeeCredentials
 } = require('../controllers/employeeController');
-const { protect } = require('../middleware/authMiddleware'); 
+const { protect } = require('../middleware/authMiddleware');
 
 router.route('/')
   .post(protect, createEmployee)
@@ -17,5 +18,7 @@ router.route('/:id')
   .get(protect, getEmployeeById)
   .put(protect, updateEmployee)
   .delete(protect, deleteEmployee);
+
+router.post('/:employeeId/regenerate-credentials', protect, regenerateEmployeeCredentials);
 
 module.exports = router;

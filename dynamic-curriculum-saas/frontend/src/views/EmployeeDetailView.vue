@@ -1,26 +1,8 @@
 <template>
   <div class="p-4 md:p-6 lg:p-8 space-y-8">
-    <!-- Loading State -->
-    <div v-if="employeeStore.isLoading && !employeeStore.currentEmployee && !initialError" class="card-intellipath p-10 text-center">
-      <div class="flex justify-center items-center space-x-3">
-        <svg class="animate-spin h-8 w-8 text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p class="text-slate-300 text-lg">Loading employee details...</p>
-      </div>
-    </div>
+    <div v-if="employeeStore.isLoading && !employeeStore.currentEmployee && !initialError" class="card-intellipath ..."></div>
+    <div v-else-if="initialError" class="card-intellipath ..."></div>
 
-    <!-- Error State -->
-    <div v-else-if="initialError" class="card-intellipath p-6 md:p-8 text-red-300 bg-red-900/40">
-      <h2 class="text-2xl font-semibold mb-3 text-red-400">Error Loading Employee</h2>
-      <p class="mb-4">{{ initialError }}</p>
-      <router-link to="/dashboard" class="btn-intellipath-secondary !py-2 !px-4 text-sm">
-        Back to Dashboard
-      </router-link>
-    </div>
-
-    <!-- Main Content if Employee Loaded -->
     <div v-else-if="employee" class="space-y-8">
       <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -28,70 +10,81 @@
             {{ employee.name }}
           </h1>
           <p class="text-slate-400 text-lg mt-1">{{ employee.current_role || 'Role not specified' }}</p>
+          <p class="text-xs text-slate-500 mt-0.5" :title="employee.username">Login: {{ employee.username }}</p>
         </div>
-        <div class="flex-shrink-0 flex gap-3">
-          <button @click="openEditEmployeeModal" class="btn-intellipath-secondary flex items-center">
+        <div class="flex-shrink-0 flex flex-wrap gap-3">
+          <button @click="openEditEmployeeModal" class="btn-intellipath-secondary flex items-center text-sm !py-2">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
             Edit Info
           </button>
-          <button @click="confirmDeleteEmployee" class="btn-intellipath-danger flex items-center">
+          <button 
+            @click="handleRegenerateRequest(employee.id)" 
+            class="btn-intellipath-secondary !border-yellow-600/50 hover:!border-yellow-500 !text-yellow-400 hover:!text-yellow-300 text-sm !py-2 flex items-center"
+            title="Regenerate login credentials for this employee">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+            Regen Credentials
+          </button>
+          <button @click="confirmDeleteEmployee" class="btn-intellipath-danger flex items-center text-sm !py-2">
             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
             Delete
           </button>
         </div>
       </header>
 
-      <!-- Employee Information Card -->
-      <div class="card-intellipath p-6 md:p-8">
+       <div class="card-intellipath p-6 md:p-8">
         <h2 class="text-xl font-semibold mb-4 text-sky-400 border-b border-slate-700 pb-3">
           Employee Information
         </h2>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-          <div>
-            <dt class="font-medium text-slate-400">Email</dt>
-            <dd class="mt-1 text-slate-200">{{ employee.email || 'N/A' }}</dd>
-          </div>
-          <div>
-            <dt class="font-medium text-slate-400">Current Role</dt>
-            <dd class="mt-1 text-slate-200">{{ employee.current_role || 'N/A' }}</dd>
-          </div>
-          <div class="sm:col-span-2">
-            <dt class="font-medium text-slate-400">Current Skills</dt>
-            <dd class="mt-1 text-slate-300 bg-slate-800/50 p-3 rounded-md whitespace-pre-wrap leading-relaxed min-h-[4rem]">
-              {{ employee.current_skills || 'No skills listed.' }}
-            </dd>
-          </div>
-          <div class="sm:col-span-2">
-            <dt class="font-medium text-slate-400">Desired Skills / Career Goal</dt>
-            <dd class="mt-1 text-slate-300 bg-slate-800/50 p-3 rounded-md whitespace-pre-wrap leading-relaxed min-h-[4rem]">
-              {{ employee.desired_skills_goal || 'No goals specified.' }}
-            </dd>
-          </div>
+          {/* ... dl content ... */}
         </dl>
       </div>
-
       <div class="card-intellipath p-6 md:p-8">
         <h2 class="text-xl font-semibold mb-0 text-sky-400 border-b border-slate-700 pb-3"> 
           Learning Path Management
         </h2>
         <PathGeneratorForm :employee="employee" class="mt-4" />
       </div>
-    </div>
 
-    <div v-else class="card-intellipath p-10 text-center">
-        <p class="text-slate-300 text-lg">Employee data not found.</p>
-        <router-link to="/dashboard" class="btn-intellipath-secondary mt-4 inline-block">
-          Back to Dashboard
-        </router-link>
     </div>
+    <div v-else class="card-intellipath ..."></div> 
 
-    <!-- Edit Employee Modal -->
     <Transition name="modal-fade">
-      <div v-if="showEditEmployeeModal && employee" 
-           class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4"
-           @click.self="closeEditModal">
-        <div class="card-intellipath w-full max-w-lg p-6 md:p-8" role="dialog" aria-modal="true">
-          <EmployeeForm :employee="employee" @success="handleEmployeeUpdated" @cancel="closeEditModal"/>
+    </Transition>
+
+    <Transition name="modal-fade">
+      <div v-if="employeeStore.newlyCreatedEmployeeCredentials && employeeStore.newlyCreatedEmployeeCredentials.employeeName === employee?.name"
+           class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
+        <div class="card-intellipath w-full max-w-md p-6 md:p-8 text-center space-y-4">
+          <div class="flex justify-center mb-2">
+            <svg class="w-12 h-12 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.588-3.757z" /></svg>
+          </div>
+          <h3 class="text-xl font-semibold text-sky-300">Credentials Regenerated!</h3>
+          <p class="text-sm text-slate-300">
+            Please securely share the following new credentials with
+            <strong class="text-sky-300">{{ employeeStore.newlyCreatedEmployeeCredentials.employeeName }}</strong>.
+            Their old password no longer works.
+          </p>
+          <div class="space-y-3 text-left bg-slate-800/60 p-4 rounded-lg border border-slate-700">
+              <div class="flex justify-between items-center">
+                  <p class="text-sm text-slate-400">Username:</p>
+                  <p class="font-mono text-slate-100 text-sm bg-slate-700 px-2 py-1 rounded">{{ employeeStore.newlyCreatedEmployeeCredentials.username }}</p>
+              </div>
+              <div class="flex justify-between items-center">
+                  <p class="text-sm text-slate-400">New Temporary Password:</p>
+                  <p class="font-mono text-slate-100 text-sm bg-slate-700 px-2 py-1 rounded">{{ employeeStore.newlyCreatedEmployeeCredentials.password }}</p>
+              </div>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+              <button @click="copyCredentialsToClipboard" class="btn-intellipath-secondary w-full flex items-center justify-center text-sm !py-2">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  {{ copyButtonText }}
+              </button>
+              <button @click="acknowledgeCredentials" class="btn-intellipath-primary w-full text-sm !py-2">
+                  Acknowledge & Close
+              </button>
+          </div>
+          <p class="text-xs text-yellow-400/80 pt-2">Advise the employee to change this password upon their first login.</p>
         </div>
       </div>
     </Transition>
@@ -164,6 +157,38 @@ const confirmDeleteEmployee = async () => {
         } else {
             alert(`Failed to delete employee: ${employeeStore.error || 'Unknown error.'}`);
         }
+    }
+};
+
+const acknowledgeCredentials = () => {
+    employeeStore.clearNewCredentials();
+    copyButtonText.value = 'Copy Credentials';
+};
+
+const copyCredentialsToClipboard = async () => {
+    if (!employeeStore.newlyCreatedEmployeeCredentials) return;
+    const creds = employeeStore.newlyCreatedEmployeeCredentials;
+    const textToCopy = `IntelliPath Employee Login:\nEmployee: ${creds.employeeName}\nUsername: ${creds.username}\nNew Password: ${creds.password}`;
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        copyButtonText.value = 'Copied!';
+        setTimeout(() => { copyButtonText.value = 'Copy Credentials'; }, 2500);
+    } catch (err) {
+        prompt("Failed to auto-copy. Please copy manually:", textToCopy);
+    }
+};
+
+const handleRegenerateRequest = async (idOfEmployeeToRegenerate) => {
+    if (!window.confirm("Are you sure you want to regenerate credentials for this employee? Their old password will stop working immediately.")) {
+        return;
+    }
+    copyButtonText.value = 'Copy Credentials';
+    try {
+        // Make sure newlyCreatedEmployeeCredentials only shows if it's for THIS employee
+        // This is handled by the v-if on the modal using employeeName comparison
+        await employeeStore.regenerateCredentials(idOfEmployeeToRegenerate);
+    } catch (err) {
+        alert("Error regenerating credentials: " + (employeeStore.error || err.message || 'Unknown error'));
     }
 };
 </script>

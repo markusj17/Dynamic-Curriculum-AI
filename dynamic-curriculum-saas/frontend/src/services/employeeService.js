@@ -16,4 +16,7 @@ export default {
   deleteEmployee(id) {
     return apiClient.delete(`/employees/${id}`);
   },
+  regenerateEmployeeCredentials(employeeId) {
+    return apiClient.post(`/employees/${employeeId}/regenerate-credentials`);
+  }
 };
