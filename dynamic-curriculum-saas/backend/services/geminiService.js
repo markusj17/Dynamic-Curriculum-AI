@@ -98,6 +98,26 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
              console.warn(`[Gemini Service] AI generation stopped due to MAX_TOKENS. Output is likely truncated. Consider increasing maxOutputTokens or simplifying the prompt/expected output length.`);
         }
 
+        if (response.promptFeedback && response.promptFeedback.blockReason) {
+            console.error(`[Gemini Service] Prompt was blocked. Reason: ${response.promptFeedback.blockReason}`, response.promptFeedback.safetyRatings);
+    // Potentially throw a more specific error here
+        }
+        if (!response.candidates || response.candidates.length === 0) {
+            console.error("[Gemini Service] No candidates returned from Gemini.");
+            throw new Error("AI returned no content.");
+        }
+        const finishReason = response.candidates[0].finishReason;
+        console.log(`[Gemini Service] AI Generation Finish Reason: ${finishReason}`); // <<< ADD OR ENSURE THIS LOG IS VISIBLE
+
+        if (finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+            console.warn(`[Gemini Service] AI generation finished with non-standard reason: ${finishReason}. Output might be incomplete or problematic.`);
+        }
+        if (finishReason === 'MAX_TOKENS') {
+            console.warn(`[Gemini Service] AI generation STOPPED DUE TO MAX_TOKENS. Output is truncated. Current maxOutputTokens: ${generationConfig.maxOutputTokens}`);
+        }
+
+        
+
         rawTextFromAI = response.text(); 
         console.log("[Gemini Service] Received raw text from Gemini (first 500 chars):\n---\n", rawTextFromAI.substring(0, 500) + (rawTextFromAI.length > 500 ? "..." : ""), "\n---");
         console.log(`[Gemini Service] Full raw text length: ${rawTextFromAI.length}`);
