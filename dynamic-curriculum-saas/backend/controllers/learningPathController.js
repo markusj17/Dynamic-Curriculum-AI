@@ -42,35 +42,55 @@ exports.generateOrUpdatePath = async (req, res, next) => { /* ... (existing logi
     }
 };
 
-// Employee or L&D Manager can view a path
 exports.getLearningPathForEmployee = async (req, res, next) => {
+  console.log("[LearningPathCtrl GET] User making request:", JSON.stringify(req.user, null, 2));
+  console.log("[LearningPathCtrl GET] Target employeeId from URL param:", req.params.employeeId, "(type:", typeof req.params.employeeId + ")");
+  
   try {
-    const { employeeId } = req.params; // This is the target employee's ID
+    const targetEmployeeId = req.params.employeeId;
     let learningPath;
+    let authorized = false;
 
     if (req.user.role === 'ld_manager') {
-      // L&D manager can view any path in their company
+      console.log(`[LearningPathCtrl GET] L&D Manager (User ID: ${req.user.id}, Company ID: ${req.user.company_id}) attempting to access path for employee ${targetEmployeeId}`);
       learningPath = await LearningPath.findOne({
-        where: { employee_id: employeeId },
-        include: [{ model: Employee, as: 'employee', where: { company_id: req.user.company_id }, attributes: ['name', 'company_id'] }]
+        where: { employee_id: targetEmployeeId },
+        include: [{ 
+            model: Employee, 
+            as: 'employee', 
+            where: { company_id: req.user.company_id }, 
+            attributes: ['name', 'company_id'] 
+        }]
       });
-    } else if (req.user.role === 'employee' && req.user.employeeId == employeeId) { // Use == for potential string/number comparison
-      // Employee can only view their own path
-      learningPath = await LearningPath.findOne({
-        where: { employee_id: req.user.employeeId }, // employeeId from token
-        include: [{ model: Employee, as: 'employee', attributes: ['name', 'company_id'] }]
-      });
-    } else {
+      if (learningPath) {
+          authorized = true;
+      }
+    } else if (req.user.role === 'employee') {
+      const loggedInEmployeeId = req.user.id.toString(); // From token via middleware
+      const requestedEmployeeId = targetEmployeeId.toString(); // From URL param
+      
+      console.log(`[LearningPathCtrl GET] Employee (ID: ${loggedInEmployeeId}) attempting to access path for employee ${requestedEmployeeId}`);
+      if (loggedInEmployeeId === requestedEmployeeId) {
+        authorized = true;
+        learningPath = await LearningPath.findOne({
+          where: { employee_id: loggedInEmployeeId },
+          include: [{ model: Employee, as: 'employee', attributes: ['name', 'company_id'] }]
+        });
+      }
+    }
+
+    if (!authorized) {
+      console.log(`[LearningPathCtrl GET] Authorization failed. User role: ${req.user.role}, User ID (if employee): ${req.user.id}, Target Employee ID: ${targetEmployeeId}`);
       const err = new Error("Forbidden: You are not authorized to view this learning path.");
       err.statusCode = 403;
       throw err;
     }
 
     if (!learningPath) {
-      return res.status(404).json({ message: "Learning path not found or access denied." });
+      console.log(`[LearningPathCtrl GET] Path not found for employee ${targetEmployeeId} (even if authorized).`);
+      return res.status(404).json({ message: "Learning path not found for this employee." });
     }
     
-    // Normalize path_data for consistency
     if (learningPath.path_data && Array.isArray(learningPath.path_data)) {
         learningPath.path_data = learningPath.path_data.map((step, index) => ({
             id: step.id || `step_${learningPath.id}_${index}`,
