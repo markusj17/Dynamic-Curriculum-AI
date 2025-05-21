@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-8">
+  <div class="space-y-8 p-12">
     <div class="text-center">
       <h1 class="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">
         Subscription Management
@@ -68,49 +68,70 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useAuthStore } from '../stores/authStore';
-import stripeService from '../services/stripeService';
-// import logoUrl from '../assets/intellipath-logo.png'; // Logo might be in Navbar already
+import { useAuthStore } from '../stores/authStore';        // Make sure this path is correct
+import stripeService from '../services/stripeService';  // Make sure this path is correct
+// import logoUrl from '../assets/intellipath-logo.png'; // Only if used directly in this template
 
 const authStore = useAuthStore();
 const portalLoading = ref(false);
 const portalError = ref(null);
 const checkoutLoading = ref(false);
 const checkoutError = ref(null);
+const initialLoadComplete = ref(false); // Added from previous full script example
 
-const basicPlanPriceId = ref(import.meta.env.VITE_STRIPE_BASIC_PLAN_PRICE_ID || 'price_YOUR_PLACEHOLDER_ID');
+// --- CORRECT WAY TO GET ENV VARIABLE ---
+// Vite exposes env variables prefixed with VITE_ on import.meta.env
+const basicPlanPriceId = ref(import.meta.env.VITE_STRIPE_BASIC_PLAN_PRICE_ID || ''); // Fallback to empty string
 
 const isSubscribeDisabled = computed(() => {
-  return checkoutLoading.value || !basicPlanPriceId.value || basicPlanPriceId.value.includes('YOUR_PLACEHOLDER_ID');
+  return checkoutLoading.value || !basicPlanPriceId.value; // Button disabled if no Price ID
 });
 
 onMounted(async () => {
-  if (!basicPlanPriceId.value || basicPlanPriceId.value.includes('price_1RPVmb03EWky4HijnDXmtvwY')) {
-    console.warn("SubscriptionView: Stripe Price ID is not configured correctly in .env (VITE_STRIPE_BASIC_PLAN_PRICE_ID). Subscription button will be disabled.");
+  // Check if the environment variable was loaded correctly
+  if (!import.meta.env.VITE_STRIPE_BASIC_PLAN_PRICE_ID) {
+    console.warn("SubscriptionView: VITE_STRIPE_BASIC_PLAN_PRICE_ID is not defined in your .env.local file or build environment. Subscription button will be disabled if not hardcoded.");
+    // If basicPlanPriceId.value is also empty, it confirms the env var is missing
+    if (!basicPlanPriceId.value) {
+        checkoutError.value = "Subscription plan ID is not configured. Please contact support.";
+    }
+  } else if (basicPlanPriceId.value === '') {
+      // This case means VITE_STRIPE_BASIC_PLAN_PRICE_ID was defined but empty
+      console.warn("SubscriptionView: VITE_STRIPE_BASIC_PLAN_PRICE_ID is defined but empty. Subscription button will be disabled.");
+      checkoutError.value = "Subscription plan configuration error. Please contact support.";
   }
-  if (!authStore.user || authStore.subscriptionStatus === null) {
-    await authStore.checkAuthStatus();
+  
+  // Fetch current user and subscription status
+  // (This logic was in the full script version, ensure it's what you want)
+  if (!authStore.user || authStore.subscriptionStatus === null || authStore.subscriptionStatus === 'inactive') {
+    // Prioritize fetching user if not present, as it includes subscription status
+    await authStore.checkAuthStatus(); 
   } else if (authStore.isAuthenticated) {
+    // If user is present but status might be stale (e.g. user just came from success page but reloaded this one)
     await authStore.updateSubscriptionStatus();
   }
+  initialLoadComplete.value = true; // From previous full script
 });
 
-const subscribe = async (priceId) => {
+const subscribe = async () => { // Removed priceId argument, will use basicPlanPriceId.value
   checkoutLoading.value = true;
   checkoutError.value = null;
   portalError.value = null;
 
-  if (!priceId || priceId.includes('price_1RPVmb03EWky4HijnDXmtvwY')) {
-      alert("Developer: Please set a valid VITE_STRIPE_BASIC_PLAN_PRICE_ID in your frontend .env file.");
-      checkoutError.value = "Stripe Price ID not configured in the frontend.";
+  if (!basicPlanPriceId.value) {
+      // This alert is more for developers during setup
+      // alert("Developer: VITE_STRIPE_BASIC_PLAN_PRICE_ID is not set in the frontend .env file or is empty.");
+      checkoutError.value = "Subscription plan is currently unavailable. Please try again later or contact support.";
       checkoutLoading.value = false;
       return;
   }
   try {
-    await stripeService.createCheckoutSession(priceId);
+    await stripeService.createCheckoutSession(basicPlanPriceId.value); // Use the ref's value
   } catch (error) {
-    checkoutError.value = error.response?.data?.message || error.message || "Failed to initiate subscription.";
+    console.error("SubscriptionView subscribe error:", error);
+    checkoutError.value = error.response?.data?.message || error.message || "Failed to initiate subscription. Please check your connection and try again.";
   } finally {
+    // redirectToCheckout usually means this won't be hit if successful
     checkoutLoading.value = false; 
   }
 };
@@ -122,7 +143,8 @@ const goToPortal = async () => {
   try {
     await stripeService.createPortalSession();
   } catch (error) {
-    portalError.value = error.response?.data?.message || error.message || "Failed to open customer portal.";
+    console.error("SubscriptionView goToPortal error:", error);
+    portalError.value = error.response?.data?.message || error.message || "Failed to open customer portal. Please try again later.";
   } finally {
     portalLoading.value = false;
   }
