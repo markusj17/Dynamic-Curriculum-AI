@@ -52,6 +52,7 @@
         <p class="text-sm text-slate-500">Click "Add Employee" to get started.</p>
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- EmployeeListItem will now show the share button -->
         <EmployeeListItem
           v-for="employee in employeeStore.employees"
           :key="employee.id"
@@ -75,10 +76,11 @@
 </template>
 
 <script setup>
+// Script section is the same as the last fully provided LDDashboardView.vue
 import { ref, onMounted, computed } from 'vue';
 import { useEmployeeStore } from '../stores/employeeStore';
-import EmployeeListItem from '../components/employees/EmployeeListItem.vue';
-import EmployeeForm from '../components/employees/EmployeeForm.vue';
+import EmployeeListItem from '../components/employees/EmployeeListItem.vue'; // Path to your component
+import EmployeeForm from '../components/employees/EmployeeForm.vue';     // Path to your component
 
 const employeeStore = useEmployeeStore();
 const showAddEmployeeModal = ref(false);
@@ -98,9 +100,7 @@ const pathsCompleted = computed(() => {
   return employeeStore.employees.filter(e => e.learningPath && e.learningPath.status === 'completed').length;
 });
 
-const openAddEmployeeModal = () => {
-  showAddEmployeeModal.value = true;
-};
+const openAddEmployeeModal = () => { showAddEmployeeModal.value = true; };
 const handleEmployeeAdded = async () => {
   showAddEmployeeModal.value = false;
   await employeeStore.fetchEmployees(); 

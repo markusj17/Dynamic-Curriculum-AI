@@ -39,26 +39,46 @@ async function generateLearningPath(currentSkills, desiredSkillsGoal) {
         });
         
         const prompt = `
-            You are an expert Learning and Development curriculum designer.
-            An employee has the following current skills: "${currentSkills}".
-            Their desired skills or career goal is: "${desiredSkillsGoal}".
+        You are an expert Learning and Development curriculum designer.
+        For an employee with current skills: "${currentSkills}"
+        And their desired skills or career goal: "${desiredSkillsGoal}"
 
-            Generate a 3 to 5-step learning path to help them achieve their goal.
-            For each step, provide:
-            1. "topic": A concise name for the learning topic (e.g., "Introduction to Python Basics").
-            2. "description": A brief (1-2 sentences) explanation of what the step covers and why it's important for their goal.
-            3. "suggested_link": A URL to a high-quality, publicly available, and directly accessible online resource (e.g., specific article, tutorial, documentation page, YouTube video). Avoid generic homepage links.
+        Generate a detailed, step-by-step learning path. The path should include a mix of lesson content, quizzes to check understanding, practical challenges, and links to external resources or videos where appropriate.
+        
+        For each step in the path, provide the following in a JSON object:
+        1.  "title": A concise title for the step (e.g., "Understanding Python Variables").
+        2.  "step_type": Choose ONE from: "lesson", "quiz", "challenge", "external_resource", "video".
+        3.  "estimated_duration_minutes": (Optional) An integer estimate.
+        4.  "details": An object containing specific content for the step_type:
+            *   If "lesson": Provide "markdown_content" (string): Detailed explanatory text in Markdown format. This can include concepts, examples, and code snippets.
+            *   If "quiz": Provide "quiz_questions" (array of objects): Each object should have "question_text" (string), "question_type" (string, e.g., "multiple_choice", "true_false"), "options" (array of strings for multiple_choice), and "correct_answer" (string or index of correct option). Include 2-3 questions. Add an "explanation" (string) for the correct answer.
+            *   If "challenge": Provide "challenge_description" (string): A practical task or problem for the employee to solve.
+            *   If "external_resource": Provide "external_url" (string): A direct URL to a high-quality external article, documentation, or tool. And "resource_summary" (string): A brief summary of what the resource covers.
+            *   If "video": Provide "video_url" (string): A direct URL to an educational video (e.g., YouTube). And "video_summary" (string): A brief summary of the video content.
 
-            Format the output as a VALID JSON array of objects. Each object must have only the keys "topic", "description", and "suggested_link". Do not include any text before or after the JSON array.
-            Example:
-            [
-              {
-                "topic": "Understanding Core Python",
-                "description": "Learn Python's fundamental syntax, data types, and control flow.",
-                "suggested_link": "https://docs.python.org/3/tutorial/"
-              }
-            ]
-        `;
+        The overall path should have between 5 to 7 main steps. Ensure a logical flow.
+        Output ONLY the JSON array of these step objects. Do not include any other text before or after the JSON.
+        Example of one step object:
+        {
+          "title": "Python Data Types",
+          "step_type": "lesson",
+          "estimated_duration_minutes": 30,
+          "details": {
+            "markdown_content": "### Introduction to Python Data Types\\nPython has various built-in data types..."
+          }
+        }
+        // Another example for a quiz step:
+        // {
+        //   "title": "Quiz: Python Basics",
+        //   "step_type": "quiz",
+        //   "estimated_duration_minutes": 15,
+        //   "details": {
+        //     "quiz_questions": [
+        //       { "question_text": "What keyword is used to define a function in Python?", "question_type": "multiple_choice", "options": ["func", "def", "function", "define"], "correct_answer": "def", "explanation": "'def' is the keyword used for function definition." }
+        //     ]
+        //   }
+        // }
+    `;
 
         console.log(`[Gemini Service] Sending prompt to Gemini`);
         
