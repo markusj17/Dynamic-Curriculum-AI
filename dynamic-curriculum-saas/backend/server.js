@@ -71,9 +71,7 @@ sequelize.authenticate()
     console.log('Database connection has been established successfully.');
     if (process.env.NODE_ENV === 'development') {
       try {
-        // CAUTION: { force: true } will drop all tables. Use { alter: true } or migrations in prod/later dev.
-        await sequelize.sync({ alter: true }); 
-        console.log("All models were synchronized successfully (alter:true).");
+        await sequelize.sync({ force: true }); 
       } catch (syncError) {
         console.error("Error during model synchronization:", syncError);
       }
