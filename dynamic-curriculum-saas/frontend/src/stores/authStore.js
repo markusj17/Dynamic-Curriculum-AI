@@ -68,9 +68,6 @@ export const useAuthStore = defineStore('auth', {
 
         console.log("AuthStore: Registration successful, user set:", this.user);
         
-        // *** CHANGE THIS LINE ***
-        // Redirect to the dashboard after successful registration.
-        // The dashboard's route guard will then check for subscription status.
         router.push({ name: 'LDDashboard' }); 
 
         return true;
@@ -91,30 +88,63 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async loginEmployee(credentials) {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        const response = await authService.loginEmployee(credentials); // Call new service method
+        const { token, ...employeeData } = response.data;
+        
+        this.token = token;
+        this.user = { ...employeeData, role: 'employee' }; 
+        this.subscriptionStatus = 'N/A';
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(this.user));
+        localStorage.setItem('subscriptionStatus', this.subscriptionStatus); // Store N/A or clear it
+
+        console.log("AuthStore: Employee login successful, user set:", this.user);
+        return true;
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Employee login failed.';
+        console.error("AuthStore: Employee login error", this.error);
+        return false;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
     async fetchCurrentUser() {
-      // ... (fetchCurrentUser logic remains the same from previous full script)
       if (!this.token || this.isFetchingCurrentUser) {
-        if (!this.token && this.user) {
-            this._clearAuthData();
-        }
+        if (!this.token && this.user) this.logout();
         return;
       }
+      
       this.isFetchingCurrentUser = true;
+      this.isLoading = true;
       try {
         const response = await authService.getMe();
-        this.user = response.data; 
-        this.subscriptionStatus = this.user.subscription_status || 'inactive';
+        this.user = response.data;
+        
+        if (this.user.role === 'ld_manager') {
+          this.subscriptionStatus = this.user.subscription_status || 'inactive';
+        } else if (this.user.role === 'employee') {
+          this.subscriptionStatus = 'N/A'; 
+        } else {
+          this.subscriptionStatus = 'inactive'; 
+        }
+
         localStorage.setItem('user', JSON.stringify(this.user));
         localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
       } catch (err) {
         if (err.response?.status === 401) this.logout();
       } finally {
+        this.isLoading = false;
         this.isFetchingCurrentUser = false;
       }
     },
 
     async checkAuthStatus() {
-      // ... (checkAuthStatus logic remains the same from previous full script)
       if (this.token && !this.user) { 
         await this.fetchCurrentUser();
       } else if (!this.token && this.user) {

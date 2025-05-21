@@ -7,6 +7,9 @@ export default {
   login(credentials) {
     return apiClient.post('/auth/login', credentials);
   },
+  loginEmployee(credentials) { 
+    return apiClient.post('/auth/employee/login', credentials);
+  },
   getMe() {
     return apiClient.get('/auth/me');
   },
