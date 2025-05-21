@@ -71,7 +71,7 @@ sequelize.authenticate()
     console.log('Database connection has been established successfully.');
     if (process.env.NODE_ENV === 'development') {
       try {
-        await sequelize.sync({ alter: true }); 
+        await sequelize.sync({ force: true }); 
       } catch (syncError) {
         console.error("Error during model synchronization:", syncError);
       }
