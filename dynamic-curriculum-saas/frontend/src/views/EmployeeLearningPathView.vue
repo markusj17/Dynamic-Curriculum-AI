@@ -78,9 +78,7 @@ const employeeName = ref('');
 const isLoading = ref(true);
 const error = ref(null);
 
-// This assumes route.params.pathId IS the employeeId for whom the path is.
-// If you implement full employee logins, you might fetch based on logged-in user instead.
-const employeeIdForPath = computed(() => route.params.pathId);
+const employeeIdForPath = computed(() => route.params.employeeId);
 
 const fetchPath = async () => {
   if (!employeeIdForPath.value) {
