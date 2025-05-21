@@ -4,7 +4,7 @@
       <h4 class="text-lg font-semibold flex-grow" 
           :class="localStepData.completed ? 'text-emerald-400 line-through decoration-emerald-500 decoration-2' : 'text-sky-300'">
         <span class="text-slate-500 mr-1.5">{{ index + 1 }}.</span>
-        {{ localStepData.title || localStepData.topic }} {/* Handle old 'topic' field */}
+        {{ localStepData.title || localStepData.topic }}
       </h4>
       <div class="flex-shrink-0 pt-1">
           <label :for="uniqueId" class="flex items-center space-x-2 cursor-pointer group" 

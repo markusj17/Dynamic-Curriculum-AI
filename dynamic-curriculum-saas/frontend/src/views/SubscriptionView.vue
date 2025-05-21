@@ -68,35 +68,29 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useAuthStore } from '../stores/authStore';        // Make sure this path is correct
-import stripeService from '../services/stripeService';  // Make sure this path is correct
-// import logoUrl from '../assets/intellipath-logo.png'; // Only if used directly in this template
+import { useAuthStore } from '../stores/authStore';
+import stripeService from '../services/stripeService';  
 
 const authStore = useAuthStore();
 const portalLoading = ref(false);
 const portalError = ref(null);
 const checkoutLoading = ref(false);
 const checkoutError = ref(null);
-const initialLoadComplete = ref(false); // Added from previous full script example
+const initialLoadComplete = ref(false); 
 
-// --- CORRECT WAY TO GET ENV VARIABLE ---
-// Vite exposes env variables prefixed with VITE_ on import.meta.env
-const basicPlanPriceId = ref(import.meta.env.VITE_STRIPE_BASIC_PLAN_PRICE_ID || ''); // Fallback to empty string
+const basicPlanPriceId = ref(import.meta.env.VITE_STRIPE_BASIC_PLAN_PRICE_ID || '');
 
 const isSubscribeDisabled = computed(() => {
   return checkoutLoading.value || !basicPlanPriceId.value; // Button disabled if no Price ID
 });
 
 onMounted(async () => {
-  // Check if the environment variable was loaded correctly
   if (!import.meta.env.VITE_STRIPE_BASIC_PLAN_PRICE_ID) {
     console.warn("SubscriptionView: VITE_STRIPE_BASIC_PLAN_PRICE_ID is not defined in your .env.local file or build environment. Subscription button will be disabled if not hardcoded.");
-    // If basicPlanPriceId.value is also empty, it confirms the env var is missing
     if (!basicPlanPriceId.value) {
         checkoutError.value = "Subscription plan ID is not configured. Please contact support.";
     }
   } else if (basicPlanPriceId.value === '') {
-      // This case means VITE_STRIPE_BASIC_PLAN_PRICE_ID was defined but empty
       console.warn("SubscriptionView: VITE_STRIPE_BASIC_PLAN_PRICE_ID is defined but empty. Subscription button will be disabled.");
       checkoutError.value = "Subscription plan configuration error. Please contact support.";
   }
