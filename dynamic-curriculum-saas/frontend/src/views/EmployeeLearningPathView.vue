@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-800 text-slate-200 flex flex-col items-center pt-10 md:pt-16 px-4 pb-16">
     <div class="w-full max-w-3xl space-y-6">
       <div class="text-center mb-8">
-        <router-link to="/" class="inline-block mb-4"> {/* Or back to a relevant public page if not logged in */}
+        <router-link to="/" class="inline-block mb-4">
           <img :src="logoUrl" alt="IntelliPath Logo" class="mx-auto h-10 w-auto" />
         </router-link>
         <h1 class="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">
@@ -21,14 +21,12 @@
           <p class="text-slate-300 text-lg">Loading your learning path...</p>
         </div>
       </div>
-
       <div v-else-if="error" class="card-intellipath bg-red-800/30 border-red-700 p-6 text-red-300">
         <h2 class="text-xl font-semibold mb-2 text-red-400">Oops! Something went wrong.</h2>
         <p>{{ error }}</p>
         <p class="mt-2 text-xs">If this persists, please contact your L&D manager or support.</p>
       </div>
-
-      <div v-else-if="learningPath && (learningPath.status === 'assigned' || learningPath.status === 'in_progress' || learningPath.status === 'completed') && learningPath.path_data && learningPath.path_data.length > 0">
+      <div v-else-if="learningPath && ['assigned', 'in_progress', 'completed'].includes(learningPath.status) && learningPath.path_data && learningPath.path_data.length > 0">
         <div class="space-y-5">
           <div v-for="(step, index) in learningPath.path_data" :key="step.id || `step-learner-${index}`"
                class="card-intellipath p-5 transition-all duration-300 ease-in-out"
@@ -36,10 +34,12 @@
                  'opacity-60 border-l-4 border-emerald-600 bg-slate-800/50 hover:opacity-100': step.completed,
                  'border-l-4 border-sky-500 hover:border-sky-400': !step.completed
                }">
-            <PathDisplayStepLearnerView
-              :step-data="step"
+            <PathDisplayStepLearnerView 
+              :step-data="step" 
               :index="index"
-              @toggle-complete="handleStepToggle"
+              :employee-id="props.employeeId"
+              :learning-path-id="learningPath.id"
+              @step-completion-updated="refreshPathData" 
             />
           </div>
         </div>
@@ -49,17 +49,13 @@
             <p class="text-slate-300 mt-1">Fantastic work, {{ employeeName || 'learner' }}! You've successfully completed all steps.</p>
         </div>
       </div>
-
       <div v-else-if="learningPath && learningPath.status === 'draft'" class="card-intellipath p-10 text-center">
           <h2 class="text-2xl font-semibold text-slate-300 mb-3">Path Not Yet Ready</h2>
           <p class="text-slate-400">Your personalized learning path is currently being prepared or is under review.</p>
-          <p class="text-slate-400 mt-1">Please check back soon!</p>
       </div>
-      
       <div v-else class="card-intellipath p-10 text-center">
         <h2 class="text-2xl font-semibold text-slate-300 mb-3">No Learning Path Available</h2>
-        <p class="text-slate-400">A learning path has not been assigned to you yet, or it might be empty.</p>
-        <p class="text-slate-400 mt-1">Please contact your L&D manager if you believe this is an error.</p>
+        <p class="text-slate-400">A learning path has not been assigned to you, or it might be empty.</p>
       </div>
     </div>
   </div>
@@ -68,97 +64,89 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import learningPathService from '../services/learningPathService'; // Make sure path is correct
-import logoUrl from '../assets/intellipath-logo.png';       // Make sure path is correct
-import PathDisplayStepLearnerView from '../components/learning-paths/PathDisplayStepLearnerView.vue'; // Make sure path is correct
+import learningPathService from '../services/learningPathService';
+import logoUrl from '../assets/intellipath-logo.png';
+import PathDisplayStepLearnerView from '../components/learning-paths/PathDisplayStepLearnerView.vue';
 
-const route = useRoute();
+const props = defineProps({
+  employeeId: { type: [String, Number], required: true } // From router props: true
+});
+
+const route = useRoute(); // Still useful for other route info if needed
 const learningPath = ref(null);
 const employeeName = ref('');
 const isLoading = ref(true);
 const error = ref(null);
 
-const employeeIdForPath = computed(() => route.params.employeeId);
-
 const fetchPath = async () => {
-  if (!employeeIdForPath.value) {
-    error.value = "Employee identifier missing from URL.";
+  if (!props.employeeId) { // Use prop directly
+    error.value = "Employee identifier missing.";
     isLoading.value = false;
     return;
   }
   isLoading.value = true;
   error.value = null;
   try {
-    // API endpoint should ideally return associated employee name if possible
-    // or learningPath object should have an 'employee' relation.
-    const response = await learningPathService.getLearningPathForEmployee(employeeIdForPath.value);
+    const response = await learningPathService.getLearningPathForEmployee(props.employeeId);
     if (response.data) {
         learningPath.value = response.data;
-        // Attempt to get employee name from the path object or a nested employee object
         employeeName.value = response.data?.employee?.name || '';
-        if (!employeeName.value && response.data?.path_data?.length > 0) {
-            // Fallback if name isn't directly available but path exists
-            // This part might need adjustment based on your actual API response structure
-            console.warn("Employee name not found directly in learning path response.");
+         // Ensure path_data steps have a 'completed' field
+        if (learningPath.value.path_data && Array.isArray(learningPath.value.path_data)) {
+            learningPath.value.path_data = learningPath.value.path_data.map((step, index) => ({
+                id: step.id || `step_learner_view_${index}`, // Ensure an ID for keying
+                completed: typeof step.completed === 'boolean' ? step.completed : false,
+                ...step,
+            }));
+        } else {
+            learningPath.value.path_data = [];
         }
+
     } else {
-        // Handle cases where response.data might be null or undefined but no error thrown
-        error.value = "Learning path data not found or invalid response from server.";
+        error.value = "Learning path data not found.";
         learningPath.value = null;
     }
   } catch (err) {
-    console.error("Error fetching learning path for learner:", err);
-    error.value = err.response?.data?.message || "Could not load your learning path. Please try again later.";
+    error.value = err.response?.data?.message || "Could not load your learning path.";
     learningPath.value = null;
   } finally {
     isLoading.value = false;
   }
 };
 
-const allStepsCompleted = computed(() => {
-    return learningPath.value && 
-           learningPath.value.path_data && 
-           learningPath.value.path_data.length > 0 && // Ensure there are steps
-           learningPath.value.path_data.every(step => step.completed);
-});
+const allStepsCompleted = computed(() => (
+    learningPath.value?.path_data?.length > 0 &&
+    learningPath.value.path_data.every(step => step.completed)
+));
 
-onMounted(() => {
-  fetchPath();
-});
-
-// Watch for changes in route param if user navigates between different employee paths (less common for this view)
-watch(employeeIdForPath, (newId, oldId) => {
-    if (newId && newId !== oldId) {
-        fetchPath();
-    }
-});
-
-const handleStepToggle = async (stepIndex, completedStatus) => {
-    if (!learningPath.value || !learningPath.value.id || !learningPath.value.path_data || typeof learningPath.value.path_data[stepIndex] === 'undefined') {
-        console.error("Cannot toggle step: path or step data missing.");
-        return;
-    }
-    
-    const originalStatus = learningPath.value.path_data[stepIndex].completed;
-    learningPath.value.path_data[stepIndex].completed = completedStatus; // Optimistic UI update
-
-    try {
-        const updatedPathResponse = await learningPathService.updateStepStatus(
-            learningPath.value.id, 
-            stepIndex, 
-            completedStatus
-        );
-        // Update local learningPath with the full response from backend to ensure consistency
-        learningPath.value = updatedPathResponse.data; 
-        // Re-evaluate employeeName if it might come from the updated path data
-        employeeName.value = updatedPathResponse.data?.employee?.name || employeeName.value;
-    } catch (err) {
-        console.error("Error updating step status for learner:", err);
-        alert("Failed to save your progress. Please try again.");
-        // Revert optimistic update if API call fails
-        if (learningPath.value && learningPath.value.path_data[stepIndex]) {
-            learningPath.value.path_data[stepIndex].completed = originalStatus;
+// This function will be called when PathDisplayStepLearnerView emits 'step-completion-updated'
+const refreshPathData = async (updatedStepData) => {
+    console.log("EmployeeLearningPathView: Received step-completion-updated, new step data:", updatedStepData);
+    // Find the step in our local learningPath.path_data and update it
+    // This is if the child component doesn't get the full path back, only its own status
+    // Or, simply re-fetch the whole path for simplicity and guaranteed consistency
+    // For now, let's assume the child component updated its own state,
+    // and we just need to update our local copy of that specific step if the event passes it.
+    // A more robust way if the child doesn't return the *entire* updated path object from the backend
+    // is to re-fetch the whole path here.
+    if (learningPath.value && learningPath.value.path_data) {
+        const stepIndex = learningPath.value.path_data.findIndex(s => s.id === updatedStepData.id || (s.title === updatedStepData.topic && s.description === updatedStepData.description)); // Fallback match
+        if (stepIndex !== -1) {
+            learningPath.value.path_data[stepIndex] = { ...learningPath.value.path_data[stepIndex], ...updatedStepData };
+            // Re-evaluate if all steps completed
+            if (allStepsCompleted.value && learningPath.value.status !== 'completed') {
+                 learningPath.value.status = 'completed'; // Optimistic UI for path status
+            }
+        } else {
+            // If step not found (shouldn't happen if IDs are stable), re-fetch for safety
+            await fetchPath();
         }
+    } else {
+        await fetchPath(); // Path data missing, re-fetch
     }
 };
+
+
+onMounted(fetchPath);
+watch(() => props.employeeId, fetchPath); // Re-fetch if employeeId prop changes
 </script>
