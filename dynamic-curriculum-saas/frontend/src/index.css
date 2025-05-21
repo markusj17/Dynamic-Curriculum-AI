@@ -3,42 +3,62 @@
 @tailwind utilities;
 
 @layer base {
-  html, body, #app {
-    @apply min-h-screen h-full;
+  html, body, #app, #app-container {
+    @apply min-h-screen h-full m-0 p-0;
   }
 
   body {
     @apply bg-slate-900 text-slate-200 antialiased;
     font-family: 'Inter', sans-serif;
-    
+    /* background-image: linear-gradient(to bottom right, theme('colors.slate.900'), theme('colors.indigo.900/70')); */
     background-repeat: no-repeat;
-    background-attachment: fixed; 
+    background-attachment: fixed;
+    overflow-x: hidden;
   }
 }
 
+/* Custom component styles for IntelliPath */
 @layer components {
   .input-field-intellipath {
-    @apply block w-full appearance-none rounded-lg border-2 border-slate-700 bg-slate-800/50 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-sm backdrop-blur-sm focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm transition-colors duration-300;
+    @apply block w-full appearance-none rounded-lg border-2 border-slate-700 bg-slate-800/50 px-4 py-3 text-slate-100 placeholder-slate-500 shadow-sm backdrop-blur-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm transition-colors duration-300;
   }
 
   .btn-intellipath-primary {
-    @apply relative inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-teal-500 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-500/30 transition-all duration-200 ease-out hover:shadow-xl hover:shadow-cyan-500/50 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 overflow-hidden;
+    @apply relative inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-sky-500 via-cyan-500 to-teal-500 px-6 py-2.5 text-base font-semibold text-white shadow-lg shadow-cyan-500/40 transition-all duration-200 ease-out hover:shadow-xl hover:shadow-cyan-500/60 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed;
   }
-
   .btn-intellipath-secondary {
-    @apply inline-flex items-center justify-center rounded-lg border-2 border-slate-700 bg-slate-800/50 px-6 py-3 text-base font-semibold text-slate-200 backdrop-blur-sm shadow-md transition-all duration-200 ease-out hover:border-sky-500 hover:text-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-900;
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-slate-600 bg-slate-700/50 px-6 py-2.5 text-base font-semibold text-slate-200 backdrop-blur-sm shadow-md transition-all duration-200 ease-out hover:border-sky-500 hover:text-sky-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+   .btn-intellipath-danger {
+    @apply inline-flex items-center justify-center rounded-lg border-2 border-red-600/50 bg-red-500/70 px-6 py-2.5 text-base font-semibold text-red-100 backdrop-blur-sm shadow-md transition-all duration-200 ease-out hover:bg-red-500/80 hover:text-white hover:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed;
   }
 
   .card-intellipath {
-    @apply bg-slate-800/70 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-2xl;
+    @apply bg-slate-800/70 backdrop-blur-md border border-slate-700/60 rounded-xl shadow-2xl;
+  }
+
+  .app-link {
+    @apply font-medium text-sky-400 hover:text-sky-300 hover:underline transition-colors duration-150;
   }
 }
 
 @keyframes subtlePulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+  50% { opacity: 0.85; }
+}
+.animate-subtle-pulse {
+  animation: subtlePulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.animate-subtle-pulse {
-  animation: subtlePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@keyframes pulse-very-slow {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.1; }
+  50% { transform: scale(1.03) rotate(5deg); opacity: 0.15; }
 }
+@keyframes pulse-even-slower {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.08; }
+  50% { transform: scale(1.02) rotate(-5deg); opacity: 0.12; }
+}
+.animate-pulse-very-slow { animation: pulse-very-slow 25s infinite ease-in-out; }
+.animate-pulse-even-slower { animation: pulse-even-slower 30s infinite ease-in-out; }
+
+.bg-gradient-radial { background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops)); }

@@ -1,29 +1,32 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/authStore'; // Adjust path if needed
+import { useAuthStore } from '../stores/authStore';
 
 // View Components (Lazy Loaded)
 const LandingView = () => import('../views/LandingView.vue');
 const LoginView = () => import('../views/LoginView.vue');
 const SignupView = () => import('../views/SignupView.vue');
 const LDDashboardView = () => import('../views/LDDashboardView.vue');
-const EmployeeListView = () => import('../views/EmployeeListView.vue'); // Make sure this file exists
 const EmployeeDetailView = () => import('../views/EmployeeDetailView.vue');
+const EmployeeLearningPathView = () => import('../views/EmployeeLearningPathView.vue');
 const SubscriptionView = () => import('../views/SubscriptionView.vue');
 const SubscriptionSuccessView = () => import('../views/SubscriptionSuccessView.vue');
 const SubscriptionCanceledView = () => import('../views/SubscriptionCanceledView.vue');
-const TermsOfServiceView = () => import('../views/TermsOfServiceView.vue'); // Make sure this file exists
-const PrivacyPolicyView = () => import('../views/PrivacyPolicyView.vue');
-const EmployeeLearningPathView = () => import('../views/EmployeeLearningPathView.vue'); // Make sure this file exists
 const NotFoundView = () => import('../views/NotFoundView.vue');
+
+// New/Placeholder Views from Landing Page links
+const ContactView = () => import('../views/ContactView.vue'); // Create this component
+const PrivacyPolicyView = () => import('../views/PrivacyPolicyView.vue'); // Create this component
+const TermsOfServiceView = () => import('../views/TermsOfServiceView.vue'); // Create this component
+
+const EmployeeListView = () => import('../views/EmployeeListView.vue');
+
 
 const routes = [
   {
     path: '/',
     name: 'Landing',
     component: LandingView,
-    meta: {
-      
-    }
+    meta: { redirectIfAuth: false }
   },
   {
     path: '/login',
@@ -43,6 +46,7 @@ const routes = [
     component: LDDashboardView,
     meta: { requiresAuth: true, requiresLDManager: true, requiresSubscription: true }
   },
+ 
   {
     path: '/employees',
     name: 'EmployeeList',
@@ -59,15 +63,15 @@ const routes = [
   {
     path: '/mylearning/:pathId',
     name: 'EmployeeLearningPath',
-    component: EmployeeLearningPathView, // Make sure this file exists
+    component: EmployeeLearningPathView,
     props: true,
-    meta: { requiresAuth: true /*, requiresEmployeeRole: true */ }
+    meta: { requiresAuth: true } // Add requiresEmployeeRole if you implement that
   },
   {
     path: '/subscription',
     name: 'Subscription',
     component: SubscriptionView,
-    meta: { requiresAuth: true } // Does not require active subscription to view/manage
+    meta: { requiresAuth: true }
   },
   {
     path: '/subscription-success',
@@ -81,8 +85,9 @@ const routes = [
     component: SubscriptionCanceledView,
     meta: { requiresAuth: true }
   },
-  { path: '/terms-of-service', name: 'TermsOfService', component: TermsOfServiceView },
-  { path: '/privacy-policy', name: 'PrivacyPolicy', component: PrivacyPolicyView },
+  { path: '/contact', name: 'Contact', component: ContactView }, // Public page
+  { path: '/privacy-policy', name: 'PrivacyPolicy', component: PrivacyPolicyView }, // Public page
+  { path: '/terms-of-service', name: 'TermsOfService', component: TermsOfServiceView }, // Public page
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -94,18 +99,24 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    if (to.hash) return { el: to.hash, behavior: 'smooth', top: 70 }; // Adjust top offset
-    if (savedPosition) return savedPosition;
-    return { top: 0, behavior: 'smooth' };
+    if (to.hash) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({ el: to.hash, behavior: 'smooth', top: 70 });
+        }, 300); 
+      });
+    } else if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0, behavior: 'smooth' };
+    }
   }
 });
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
 
-  // Ensure auth status is checked, especially on page reload or direct navigation
-  if (localStorage.getItem('token') && !authStore.user && !authStore.isFetchingCurrentUser) {
-    // Added !authStore.isFetchingCurrentUser to prevent multiple calls if navigation is rapid
+  if (localStorage.getItem('token') && !authStore.user) {
     await authStore.checkAuthStatus();
   }
 
@@ -114,36 +125,27 @@ router.beforeEach(async (to, from, next) => {
   const redirectIfAuth = to.matched.some(record => record.meta.redirectIfAuth);
 
   if (redirectIfAuth && authStore.isAuthenticated) {
-    console.log("Router: Authenticated user accessing Landing/Public page. Redirecting to dashboard.");
     next({ name: 'LDDashboard' });
   } else if (requiresGuest && authStore.isAuthenticated) {
-    console.log("Router: Authenticated user accessing Login/Signup. Redirecting to dashboard.");
     next({ name: 'LDDashboard' });
   } else if (requiresAuth && !authStore.isAuthenticated) {
-    console.log("Router: Unauthenticated user accessing protected route. Redirecting to login for:", to.fullPath);
     next({ name: 'Login', query: { redirect: to.fullPath } });
   } else if (requiresAuth && authStore.isAuthenticated) {
-    console.log("Router: Authenticated user. Checking further requirements for:", to.name);
     const requiresLDManager = to.matched.some(record => record.meta.requiresLDManager);
     const requiresSubscription = to.matched.some(record => record.meta.requiresSubscription);
 
     if (requiresSubscription && !authStore.hasActiveSubscription) {
       if (!['Subscription', 'SubscriptionSuccess', 'SubscriptionCanceled'].includes(to.name)) {
-        console.log("Router: Subscription required for", to.name, ". Redirecting to Subscription page.");
-        next({ name: 'Subscription', query: { message: 'An active subscription is required.' } });
+        next({ name: 'Subscription', query: { message: 'Active subscription required.' } });
         return;
       }
     }
-
     if (requiresLDManager && !authStore.isLdManager) {
-      console.log("Router: LD Manager role required for", to.name, ". Redirecting to NotFound.");
       next({ name: 'NotFound' });
       return;
     }
-    console.log("Router: All checks passed for authenticated route", to.name);
     next();
   } else {
-    console.log("Router: Public route or no specific guard matched for", to.name);
     next();
   }
 });
