@@ -36,7 +36,6 @@
           Employee Information
         </h2>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-          {/* ... dl content ... */}
         </dl>
       </div>
       <div class="card-intellipath p-6 md:p-8">

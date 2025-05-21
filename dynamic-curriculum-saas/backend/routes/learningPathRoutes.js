@@ -3,6 +3,7 @@ const router = express.Router();
 const learningPathController = require('../controllers/learningPathController');
 const { protect } = require('../middleware/authMiddleware'); // Auth for all these routes
 
+
 // L&D Manager generates/regenerates path for an employee
 router.post('/employee/:employeeId/generate', protect, learningPathController.generateOrUpdatePath);
 

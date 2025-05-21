@@ -1,5 +1,5 @@
 <template>
-  <div class="card-intellipath p-5 space-y-3 flex flex-col justify-between h-full"> {/* Added h-full */}
+  <div class="card-intellipath p-5 space-y-3 flex flex-col justify-between h-full">
     <div>
       <h3 class="text-lg font-semibold text-sky-400 truncate" :title="employee.name">{{ employee.name }}</h3>
       <p class="text-sm text-slate-400 truncate" :title="employee.current_role">{{ employee.current_role || 'No role specified' }}</p>
@@ -11,7 +11,7 @@
         </span>
       </div>
     </div>
-    <div class="mt-4 space-y-2 pt-2 border-t border-slate-700/50"> {/* Added border */}
+    <div class="mt-4 space-y-2 pt-2 border-t border-slate-700/50">
       <router-link :to="{ name: 'EmployeeDetail', params: { id: employee.id } }" class="btn-intellipath-secondary w-full !py-1.5 text-xs sm:text-sm block text-center">
         View Details & Path
       </router-link>
