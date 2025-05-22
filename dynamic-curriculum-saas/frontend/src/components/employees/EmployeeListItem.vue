@@ -54,7 +54,7 @@ const pathStatusColor = (status) => {
 
 const copyShareableLink = async (employeeId) => {
   const baseUrl = window.location.origin;
-  const shareableLink = `${baseUrl}/mylearning/${employeeId}`;
+  const shareableLink = `${baseUrl}/employee-login`;
   try {
     await navigator.clipboard.writeText(shareableLink);
     linkCopiedState[employeeId] = true;
