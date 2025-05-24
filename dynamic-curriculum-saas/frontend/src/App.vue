@@ -30,7 +30,7 @@ const isAuthCheckComplete = ref(false);
 const shouldShowAppShell = computed(() => {
   if (!isAuthCheckComplete.value) return false; 
 
-  const fullPageRoutes = ['Landing', 'Login', 'Signup', 'NotFound', 'Contact', 'PrivacyPolicy', 'TermsOfService', 'EmployeeLearningPath', 'EmployeeLogin'];
+  const fullPageRoutes = ['Landing', 'Login', 'Signup', 'NotFound', 'Contact', 'EmployeeLearningPath', 'EmployeeLogin'];
   
   if (!authStore.isAuthenticated) return false;
   
