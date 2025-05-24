@@ -15,5 +15,5 @@
 </template>
 
 <script setup>
-import logoUrl from '../assets/intellipath-logo.png'; // Adjust path as needed
+import logoUrl from '../assets/intellipath-logo.png';
 </script>

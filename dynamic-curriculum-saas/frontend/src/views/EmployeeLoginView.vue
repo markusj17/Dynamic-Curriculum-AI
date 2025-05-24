@@ -1,12 +1,10 @@
 <template>
   <div class="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-slate-900">
-    <!-- Optional: Animated background elements (can be same or similar to other auth views) -->
     <div class="absolute inset-0 z-0 opacity-30">
       <div class="absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] bg-gradient-radial from-teal-700/40 via-transparent to-transparent rounded-full animate-pulse-slow delay-500"></div>
       <div class="absolute bottom-[-20%] right-[-20%] w-[70vw] h-[70vw] bg-gradient-radial from-indigo-700/30 via-transparent to-transparent rounded-full animate-pulse-slower delay-1500"></div>
     </div>
 
-    <!-- Employee Login Form Component (can be inline or a separate component) -->
     <div class="w-full max-w-md space-y-6 z-10">
       <div class="text-center">
         <router-link to="/">

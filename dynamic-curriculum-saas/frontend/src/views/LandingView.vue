@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-slate-200 overflow-x-hidden">
-    <!-- Header Section -->
     <header class="sticky top-0 z-30 w-full py-4 bg-slate-900/70 backdrop-blur-lg shadow-md">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <router-link to="/" class="flex items-center space-x-3 group">
@@ -34,7 +33,6 @@
               Sign Up Free
             </router-link>
           </template>
-           <!-- Mobile Menu Button -->
           <div class="flex md:hidden">
             <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-md text-slate-300 hover:text-sky-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-sky-500" aria-controls="mobile-menu" :aria-expanded="mobileMenuOpen.toString()">
               <span class="sr-only">Open main menu</span>
@@ -44,7 +42,6 @@
           </div>
         </div>
       </div>
-       <!-- Mobile Menu Content -->
       <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 -translate-y-1" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-1">
         <div v-if="mobileMenuOpen" class="md:hidden bg-slate-800/90 backdrop-blur-sm rounded-b-lg shadow-xl">
           <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
@@ -57,10 +54,8 @@
       </Transition>
     </header>
 
-    <!-- Hero Section -->
     <section class="relative pt-20 pb-24 md:pt-32 md:pb-40 text-center overflow-hidden">
       <div class="absolute inset-0 z-0 opacity-10">
-        <!-- More subtle, larger, and slower background elements -->
         <div class="absolute -top-1/4 -left-1/4 w-3/4 h-3/4 bg-gradient-radial from-sky-800 via-transparent to-transparent rounded-full animate-pulse-very-slow filter blur-3xl"></div>
         <div class="absolute -bottom-1/4 -right-1/4 w-3/4 h-3/4 bg-gradient-radial from-purple-800 via-transparent to-transparent rounded-full animate-pulse-even-slower filter blur-3xl delay-3000"></div>
       </div>
@@ -89,7 +84,6 @@
       </div>
     </section>
 
-    <!-- How It Works Section -->
     <section id="how-it-works" class="py-16 md:py-24 bg-slate-900/50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 md:mb-16">
@@ -99,19 +93,16 @@
                 </p>
             </div>
             <div class="grid md:grid-cols-3 gap-8 text-center">
-                <!-- Step 1 -->
                 <div class="card-intellipath p-6 md:p-8">
                     <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-sky-500 to-cyan-400 mb-3">1</div>
                     <h3 class="text-xl font-semibold text-slate-100 mb-2">Assess & Analyze</h3>
                     <p class="text-slate-400 text-sm">Integrates with HRIS, performance reviews, or uses built-in tools to understand current skills and desired career trajectories.</p>
                 </div>
-                <!-- Step 2 -->
                 <div class="card-intellipath p-6 md:p-8">
                     <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-cyan-500 to-teal-400 mb-3">2</div>
                     <h3 class="text-xl font-semibold text-slate-100 mb-2">AI Path Generation</h3>
                     <p class="text-slate-400 text-sm">Our intelligent engine crafts a unique learning path, curating content from internal libraries, licensed providers, and open web resources.</p>
                 </div>
-                <!-- Step 3 -->
                 <div class="card-intellipath p-6 md:p-8">
                      <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-teal-500 to-emerald-400 mb-3">3</div>
                     <h3 class="text-xl font-semibold text-slate-100 mb-2">Learn & Adapt</h3>
@@ -121,7 +112,6 @@
         </div>
     </section>
 
-    <!-- Features Section (Expanded) -->
     <section id="features" class="py-16 md:py-24">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12 md:mb-16">
@@ -131,37 +121,31 @@
           </p>
         </div>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <!-- Feature: AI Personalization -->
           <div class="card-intellipath p-6">
             <div class="feature-icon-bg"><svg class="h-6 w-6 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 16v-2m0-8a4 4 0 00-4 4h8a4 4 0 00-4-4z"></path></svg></div>
             <h3 class="text-xl font-semibold text-slate-100 mt-4">True Personalization</h3>
             <p class="mt-2 text-slate-400 text-sm">AI understands individual skill gaps, learning styles, and career goals to create truly unique pathways.</p>
           </div>
-          <!-- Feature: Dynamic Curation -->
           <div class="card-intellipath p-6">
             <div class="feature-icon-bg"><svg class="h-6 w-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10m16-5H4m16 0l-3.172-3.172a4 4 0 00-5.656 0L8 10m0 0l-3.172 3.172a4 4 0 005.656 0L12 10z" /></svg></div>
             <h3 class="text-xl font-semibold text-slate-100 mt-4">Smart Content Aggregation</h3>
             <p class="mt-2 text-slate-400 text-sm">Pulls the best content from internal repositories, top learning platforms (Coursera, LinkedIn Learning), and the open web.</p>
           </div>
-          <!-- Feature: Real-time Adaptation -->
           <div class="card-intellipath p-6">
             <div class="feature-icon-bg"><svg class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div>
             <h3 class="text-xl font-semibold text-slate-100 mt-4">Adaptive Curriculum</h3>
             <p class="mt-2 text-slate-400 text-sm">Learning paths adjust based on learner progress, feedback, and shifting business priorities, ensuring relevance.</p>
           </div>
-          <!-- Feature: Engagement -->
           <div class="card-intellipath p-6">
             <div class="feature-icon-bg"><svg class="h-6 w-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
             <h3 class="text-xl font-semibold text-slate-100 mt-4">Interactive & Engaging</h3>
             <p class="mt-2 text-slate-400 text-sm">Includes interactive elements, simulations, and opportunities for mentor matching to boost engagement.</p>
           </div>
-           <!-- Feature: Integrations -->
           <div class="card-intellipath p-6">
             <div class="feature-icon-bg"><svg class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg></div>
             <h3 class="text-xl font-semibold text-slate-100 mt-4">Seamless Integrations</h3>
             <p class="mt-2 text-slate-400 text-sm">Connects with your existing HRIS, performance review tools, and skills assessment platforms.</p>
           </div>
-           <!-- Feature: ROI & Analytics -->
           <div class="card-intellipath p-6">
             <div class="feature-icon-bg"><svg class="h-6 w-6 text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
             <h3 class="text-xl font-semibold text-slate-100 mt-4">Measurable ROI</h3>
@@ -171,7 +155,6 @@
       </div>
     </section>
 
-    <!-- Pricing Section (Placeholder) -->
     <section id="pricing" class="py-16 md:py-24 bg-slate-900/50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12 md:mb-16">
@@ -194,12 +177,10 @@
                     </ul>
                     <p class="mt-6 text-xs text-slate-500 text-center">More plans for larger teams and advanced features coming soon!</p>
                 </div>
-                <!-- Add more plan cards here for Enterprise, etc. -->
             </div>
         </div>
     </section>
 
-    <!-- Final Call to Action -->
     <section class="py-16 md:py-24">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-cyan-300 to-teal-300">
@@ -239,16 +220,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'; // Added onMounted
+import { ref, onMounted } from 'vue'; 
 import { useAuthStore } from '../stores/authStore';
-import logoUrl from '../assets/intellipath-logo.png'; // Adjust path as needed
+import logoUrl from '../assets/intellipath-logo.png'; 
 
 const authStore = useAuthStore();
 const mobileMenuOpen = ref(false);
 
 onMounted(() => {
-  // If not already fetched by App.vue, ensure auth status is checked
-  // This helps if user lands directly here and App.vue onMounted hasn't run yet or state isn't ready
   if (!authStore.user && localStorage.getItem('token')) {
     authStore.checkAuthStatus();
   }
@@ -261,19 +240,17 @@ const handleLogout = () => {
 
 const closeMobileMenuAndScroll = (hash) => {
   mobileMenuOpen.value = false;
-  // Wait for menu to close before scrolling
   setTimeout(() => {
     const targetElement = document.querySelector(hash);
     if (targetElement) {
-      const headerOffset = 70; // Adjust to your sticky header's height
+      const headerOffset = 70;
       const elementPosition = targetElement.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
     }
-  }, 150); // Small delay for transition
+  }, 150);
 };
 
-// For smooth scroll directive v-smooth-scroll on "Learn More" and "Discover Features"
 const vSmoothScroll = {
   mounted: (el) => {
     el.addEventListener('click', (event) => {
@@ -282,7 +259,7 @@ const vSmoothScroll = {
         event.preventDefault();
         const targetElement = document.querySelector(href);
         if (targetElement) {
-          const headerOffset = 70; // Adjust to your sticky header's height
+          const headerOffset = 70;
           const elementPosition = targetElement.getBoundingClientRect().top;
           const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
           window.scrollTo({ top: offsetPosition, behavior: "smooth" });
@@ -321,7 +298,7 @@ const vSmoothScroll = {
 .animate-pulse-even-slower {
   animation: pulse-even-slower 25s infinite ease-in-out;
 }
-.bg-gradient-radial { /* Ensure this is defined if not using Tailwind JIT for it */
+.bg-gradient-radial {
   background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops));
 }
 </style>
