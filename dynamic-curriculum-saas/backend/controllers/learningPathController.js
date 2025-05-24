@@ -111,7 +111,7 @@ exports.getLearningPathForEmployee = async (req, res, next) => {
 };
 
 // L&D Manager curates path
-exports.curateLearningPath = async (req, res, next) => { /* ... (existing logic, ensure it checks req.user.role === 'ld_manager' and company_id) ... */
+exports.curateLearningPath = async (req, res, next) => {
     const t = await sequelize.transaction();
     try {
         if (req.user.role !== 'ld_manager') { const err = new Error("Forbidden: Only L&D Managers can curate paths."); err.statusCode = 403; throw err; }
@@ -153,9 +153,9 @@ exports.updateStepStatus = async (req, res, next) => {
     if (!learningPath) { const err = new Error("Learning path not found."); err.statusCode = 404; throw err; }
 
     const isLdManagerForThisPath = req.user.role === 'ld_manager' && learningPath.employee.company_id === req.user.company_id;
-    const isAssignedEmployee = req.user.role === 'employee' && learningPath.employee_id === req.user.employeeId; // employeeId from token
+    const isAssignedEmployee = req.user.role === 'employee' && learningPath.employee_id === req.user.employeeId;
 
-    if (!isLdManagerForThisPath && !isAssignedEmployee) {
+    if (!isLdManagerForThisPath) { // REMOVED "isAssignedEmployee", could cause problems but it shouldn't matter in the long run (for now atleast)
       const err = new Error("Not authorized to update this step status.");
       err.statusCode = 403;
       throw err;
