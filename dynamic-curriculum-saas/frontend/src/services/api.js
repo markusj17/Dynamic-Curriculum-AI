@@ -8,7 +8,6 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add JWT token
 apiClient.interceptors.request.use(
   (config) => {
     const authStore = useAuthStore(); // Get store instance inside interceptor
@@ -23,7 +22,6 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor for handling errors (e.g., 401 for logout)
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {

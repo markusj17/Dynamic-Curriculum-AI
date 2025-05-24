@@ -7,7 +7,7 @@ export default {
   getLearningPathForEmployee(employeeId) {
     return apiClient.get(`/learning-paths/employee/${employeeId}`);
   },
-  curateLearningPath(pathId, pathData) { // pathData could include { path_data: [...], status: 'assigned' }
+  curateLearningPath(pathId, pathData) { 
     return apiClient.put(`/learning-paths/${pathId}`, pathData);
   },
   updateStepStatus(pathId, stepIndex, completed) {

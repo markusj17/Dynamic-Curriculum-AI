@@ -153,7 +153,6 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async updateSubscriptionStatus() {
-      // ... (updateSubscriptionStatus logic remains the same from previous full script)
        if (!this.isAuthenticated) return;
         try {
             const response = await stripeService.getSubscriptionStatus();
@@ -169,7 +168,6 @@ export const useAuthStore = defineStore('auth', {
     },
 
     setSubscriptionSuccess() {
-      // ... (setSubscriptionSuccess logic remains the same from previous full script)
         this.subscriptionStatus = 'active'; 
         localStorage.setItem('subscriptionStatus', this.subscriptionStatus);
         if (this.user) {

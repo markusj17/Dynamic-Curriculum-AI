@@ -155,7 +155,7 @@ exports.updateStepStatus = async (req, res, next) => {
     const isLdManagerForThisPath = req.user.role === 'ld_manager' && learningPath.employee.company_id === req.user.company_id;
     const isAssignedEmployee = req.user.role === 'employee' && learningPath.employee_id === req.user.employeeId; // employeeId from token
 
-    if (!isLdManagerForThisPath && !isAssignedEmployee) {
+    if (!isLdManagerForThisPath && employeeId !== pathId) {
       const err = new Error("Not authorized to update this step status.");
       err.statusCode = 403;
       throw err;
