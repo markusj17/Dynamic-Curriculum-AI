@@ -153,10 +153,14 @@ exports.updateStepStatus = async (req, res, next) => {
     if (!learningPath) { const err = new Error("Learning path not found."); err.statusCode = 404; throw err; }
 
     const isLdManagerForThisPath = req.user.role === 'ld_manager' && learningPath.employee.company_id === req.user.company_id;
-    const isAssignedEmployee = req.user.role === 'employee' && learningPath.employee_id === req.user.employeeId;
+    const isAssignedEmployee = req.user.role === 'employee' && learningPath.employee_id == req.user.employeeId;
 
-    if (!isLdManagerForThisPath) { // REMOVED "isAssignedEmployee", could cause problems but it shouldn't matter in the long run (for now atleast)
+    if (!isLdManagerForThisPath && !isAssignedEmployee) {
       const err = new Error("Not authorized to update this step status.");
+      console.log('User role:', req.user.role);
+      console.log('User employeeId:', req.user.employeeId, 'type:', typeof req.user.employeeId);
+      console.log('LearningPath employee_id:', learningPath.employee_id, 'type:', typeof learningPath.employee_id);
+      console.log('Are they equal?', learningPath.employee_id === req.user.employeeId);
       err.statusCode = 403;
       throw err;
     }
