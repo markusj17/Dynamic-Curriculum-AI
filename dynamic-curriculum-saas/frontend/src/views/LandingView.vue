@@ -10,6 +10,7 @@
           <a href="#features" v-smooth-scroll class="landing-nav-link">Features</a>
           <a href="#how-it-works" v-smooth-scroll class="landing-nav-link">How It Works</a>
           <a href="#pricing" v-smooth-scroll class="landing-nav-link">Pricing</a>
+          <router-link to="/getting-started" class="nav-link" title="How to Use IntelliPath">How to Use IntelliPath</router-link>
           <router-link to="/contact" class="landing-nav-link">Contact</router-link>
         </nav>
         <div class="flex items-center space-x-3">
